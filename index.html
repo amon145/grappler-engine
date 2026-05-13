@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="12-week 5/3/1 gamified conditioning & strength for BJJ/Judo — Front Squat primary — offline">
+<title>Grappler Engine — Front Squat 5/3/1 + Conditioning</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --card: #1c1c1c;
+    --accent: #d62828;
+    --accent2: #f77f00;
+    --text: #e8e8e8;
+    --muted: #888;
+    --border: #2a2a2a;
+    --radius: 14px;
+    --space: 1rem;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; overflow-x: hidden; }
+  body { padding-bottom: 100px; }
+
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(10,10,10,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem var(--space);
+    text-align: center;
+  }
+  header h1 { font-size: 1.1rem; letter-spacing: 0.5px; }
+  header span { color: var(--accent); }
+
+  .tagline {
+    text-align: center; padding: 1.2rem var(--space) 0.4rem;
+    font-size: 0.85rem; color: var(--muted);
+  }
+
+  nav.tabs {
+    display: flex; gap: 6px; overflow-x: auto;
+    padding: 0.6rem var(--space); scrollbar-width: none;
+    position: sticky; top: 48px; z-index: 40;
+    background: rgba(10,10,10,0.9); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs button {
+    flex: 0 0 auto; white-space: nowrap;
+    background: var(--surface); color: var(--muted);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  nav.tabs button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  main { padding: 0.6rem var(--space); max-width: 720px; margin: 0 auto; }
+
+  .section-title {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--accent2); margin: 1.2rem 0 0.6rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 0.7rem; overflow: hidden; transition: transform 0.2s;
+  }
+  .card:active { transform: scale(0.995); }
+  .card-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem; cursor: pointer; user-select: none;
+  }
+  .card-header h3 { font-size: 0.95rem; font-weight: 600; }
+  .card-header .chevron {
+    width: 22px; height: 22px; border: 2px solid var(--muted); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; color: var(--muted); transition: transform 0.25s;
+  }
+  .card.open .chevron { transform: rotate(180deg); border-color: var(--accent); color: var(--accent); }
+  .card-body {
+    max-height: 0; overflow: hidden; transition: max-height 0.35s ease;
+    border-top: 1px solid transparent;
+  }
+  .card.open .card-body { max-height: 1000px; border-top-color: var(--border); }
+  .card-content { padding: 0.8rem 1rem 1.2rem; font-size: 0.88rem; color: #ccc; }
+  .card-content p { margin-bottom: 0.6rem; }
+  .card-content ul { margin-left: 1.1rem; margin-bottom: 0.6rem; }
+  .card-content li { margin-bottom: 0.35rem; }
+  .badge {
+    display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border-radius: 4px; margin-right: 0.4rem; letter-spacing: 0.5px;
+  }
+  .badge-red { background: rgba(214,40,40,0.15); color: #ff6b6b; }
+  .badge-orange { background: rgba(247,127,0,0.15); color: #ffb347; }
+  .badge-blue { background: rgba(70,130,180,0.15); color: #87ceeb; }
+  .badge-green { background: rgba(46,204,113,0.15); color: #2ecc71; }
+  .badge-purple { background: rgba(155,89,182,0.15); color: #bb8fce; }
+  .badge-gold { background: rgba(241,196,15,0.15); color: #f1c40f; }
+
+  .meta-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+
+  .note {
+    background: rgba(247,127,0,0.08); border-left: 3px solid var(--accent2);
+    padding: 0.8rem 1rem; border-radius: 0 8px 8px 0; font-size: 0.85rem; color: #ddd; margin: 1rem 0;
+  }
+
+  .schedule-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .schedule-table th, .schedule-table td { padding: 0.7rem 0.5rem; text-align: left; border-bottom: 1px solid var(--border); }
+  .schedule-table th { color: var(--accent2); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+  .schedule-table td:first-child { font-weight: 600; white-space: nowrap; }
+
+  footer {
+    text-align: center; padding: 2rem 1rem; font-size: 0.75rem; color: var(--muted);
+  }
+
+  .hidden { display: none !important; }
+
+  /* ===== CIRCUIT TIMER ===== */
+  .timer-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.2rem; margin-bottom: 1rem;
+  }
+  .timer-display {
+    font-size: 4.5rem; font-weight: 700; font-variant-numeric: tabular-nums;
+    letter-spacing: -2px; text-align: center; margin: 0.5rem 0; color: var(--text);
+  }
+  .timer-display.rest { color: var(--accent2); }
+  .timer-display.done { color: #2ecc71; }
+  .timer-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; text-align: center; }
+  .timer-sub { font-size: 0.9rem; color: var(--accent); text-align: center; margin-top: 0.3rem; font-weight: 600; }
+
+  .timer-controls { display: flex; gap: 0.6rem; justify-content: center; margin-top: 1.2rem; flex-wrap: wrap; }
+  .timer-controls button {
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.7rem 1.2rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  }
+  .timer-controls button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .exercise-list { margin-top: 1rem; }
+  .ex-row {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 0.4rem;
+    align-items: center; margin-bottom: 0.4rem;
+  }
+  .ex-row input {
+    background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.45rem; font-size: 0.8rem; text-align: center; width: 100%;
+  }
+  .ex-row input.name { text-align: left; padding-left: 0.6rem; }
+  .ex-row label {
+    font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
+    display: block; margin-bottom: 0.2rem;
+  }
+  .ex-add-del { display: flex; gap: 0.4rem; justify-content: center; margin-top: 0.6rem; }
+  .ex-add-del button {
+    background: var(--surface); color: var(--muted); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.4rem 0.8rem; font-size: 0.75rem; cursor: pointer;
+  }
+
+  .quick-presets {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;
+  }
+  .quick-presets button {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 0.8rem; color: var(--text); font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: left;
+  }
+  .quick-presets button small { display: block; color: var(--muted); font-size: 0.7rem; font-weight: 400; margin-top: 0.2rem; }
+
+  .progress-bar {
+    width: 100%; height: 6px; background: var(--surface); border-radius: 3px; margin-top: 0.8rem; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent); width: 0%; transition: width 0.3s;
+  }
+
+  /* ===== GAMIFICATION ===== */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; margin-bottom: 1rem;
+  }
+  .stat-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem; text-align: center;
+  }
+  .stat-box .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+  .stat-box .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.2rem; }
+
+  .xp-bar-wrap {
+    background: var(--surface); border-radius: 8px; height: 22px; overflow: hidden; margin: 0.8rem 0; border: 1px solid var(--border);
+  }
+  .xp-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 0%; transition: width 0.5s; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;
+    font-size: 0.65rem; font-weight: 700; color: #fff;
+  }
+
+  .belt-display {
+    text-align: center; margin: 1rem 0;
+  }
+  .belt-display .belt-name {
+    font-size: 1.3rem; font-weight: 700; color: var(--accent2); letter-spacing: 1px;
+  }
+  .belt-display .belt-sub {
+    font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem;
+  }
+
+  .badge-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.8rem;
+  }
+  .badge-item {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 0.8rem 0.4rem; text-align: center; opacity: 0.35; transition: opacity 0.3s;
+  }
+  .badge-item.earned { opacity: 1; border-color: var(--accent2); }
+  .badge-item .icon { font-size: 1.4rem; margin-bottom: 0.3rem; }
+  .badge-item .bname { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text); }
+  .badge-item .bdesc { font-size: 0.6rem; color: var(--muted); margin-top: 0.15rem; }
+
+  .log-form {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem; margin-bottom: 1rem;
+  }
+  .log-form input, .log-form select, .log-form textarea {
+    width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.6rem; font-size: 0.85rem; margin-bottom: 0.5rem; font-family: var(--font);
+  }
+  .log-form textarea { min-height: 60px; resize: vertical; }
+  .log-form button {
+    width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 0.7rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 0.3rem;
+  }
+
+  .log-list {
+    max-height: 300px; overflow-y: auto;
+  }
+  .log-entry {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.7rem; margin-bottom: 0.5rem; font-size: 0.8rem;
+  }
+  .log-entry .ldate { color: var(--accent2); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; }
+  .log-entry .ltype { color: var(--text); font-weight: 600; }
+  .log-entry .lxp { color: var(--accent); font-weight: 700; }
+  .log-entry .ldel { float: right; color: var(--muted); cursor: pointer; font-size: 0.9rem; }
+
+  .block-progress {
+    display: flex; gap: 4px; margin: 0.8rem 0;
+  }
+  .block-week {
+    flex: 1; height: 28px; background: var(--surface); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: var(--muted);
+    border: 1px solid var(--border); transition: all 0.3s;
+  }
+  .block-week.done { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+  .block-week.active { background: var(--accent2); color: #000; border-color: var(--accent2); font-weight: 700; }
+
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--card); border: 1px solid var(--accent2); color: var(--text);
+    padding: 0.8rem 1.4rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600;
+    z-index: 100; opacity: 0; transition: all 0.4s; pointer-events: none; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  .pr-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.6rem; }
+  .pr-table th, .pr-table td { padding: 0.5rem; text-align: left; border-bottom: 1px solid var(--border); }
+  .pr-table th { color: var(--accent2); font-size: 0.7rem; text-transform: uppercase; }
+  .pr-table input { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 0.3rem 0.5rem; width: 100%; font-size: 0.8rem; }
+
+  /* 5/3/1 Calculator */
+  .calc-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.8rem;
+  }
+  .calc-grid input {
+    background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.6rem; font-size: 1rem; width: 100%;
+  }
+  .calc-grid label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 0.2rem; }
+  .calc-result {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 0.8rem; margin-top: 0.6rem; font-size: 0.85rem;
+  }
+  .calc-result .week-title { color: var(--accent2); font-weight: 700; margin-bottom: 0.3rem; }
+  .calc-result .set-line { margin-bottom: 0.2rem; }
+  .calc-result .amrap { color: var(--accent); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span>GRAPPLER</span> ENGINE</h1>
+</header>
+
+<p class="tagline">12-week Front Squat 5/3/1 + gamified conditioning for BJJ & Judo — offline</p>
+
+<nav class="tabs" id="tabNav">
+  <button class="active" data-target="strength">5/3/1 Strength</button>
+  <button data-target="explosive">Explosive</button>
+  <button data-target="endurance">Endurance</button>
+  <button data-target="sport">Sport</button>
+  <button data-target="schedule">12-Week Plan</button>
+  <button data-target="timer">Timer</button>
+  <button data-target="progress">Progress</button>
+</nav>
+
+<main>
+
+<!-- STRENGTH -->
+<div id="strength" class="tab-content">
+  <div class="section-title">5/3/1 for Grapplers — Front Squat Primary</div>
+  <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.8rem;">Two days per week. Front squat is the main lift for upright torso, core bracing, and throw-specific leg drive. Back squat and goblet squat are alternates. Built around Wendler 5/3/1 with a conservative training max so you can still roll tomorrow.</p>
+
+  <div class="note">
+    <strong>Core rule:</strong> Your training max (TM) is 90% of your true 1-rep max. If you do not know your 1RM, use a recent 5-rep max and multiply by 1.15. The calculator below does the math.
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Day A — Front Squat & Pull</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">Lower + Back</span>
+        <span class="badge badge-orange">60 min</span>
+      </div>
+      <table class="schedule-table">
+        <tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Rest</th></tr>
+        <tr><td>Front Squat (5/3/1)</td><td>3</td><td>5/3/1+</td><td>3 min</td></tr>
+        <tr><td>DB Romanian Deadlift</td><td>3</td><td>8–10</td><td>2 min</td></tr>
+        <tr><td>Pull-Ups or Lat Pulldown</td><td>4</td><td>6–10</td><td>90s</td></tr>
+        <tr><td>DB Farmer's Carry</td><td>3</td><td>40m</td><td>90s</td></tr>
+        <tr><td>Hanging Leg Raises</td><td>3</td><td>10–12</td><td>60s</td></tr>
+      </table>
+      <p style="margin-top:0.6rem;"><strong>Rack position tips:</strong> Clean grip if your wrists allow it. Otherwise use cross-arm grip or straps looped around the bar. Elbows high — the bar should sit on your front delts, not your collarbone.</p>
+      <p><em>Alternate main lift:</em> If your front rack is fried from gi gripping, swap to <strong>Back Squat</strong> for one cycle. Same 5/3/1 percentages.</p>
+      <p><em>No barbell today?</em> Use <strong>Goblet Squat</strong> 4×8–10 with the heaviest dumbbell or kettlebell you can clean to your chest.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Day B — Push & Hinge</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">Upper + Posterior</span>
+        <span class="badge badge-orange">60 min</span>
+      </div>
+      <table class="schedule-table">
+        <tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Rest</th></tr>
+        <tr><td>DB Bench Press</td><td>4</td><td>6–8</td><td>2 min</td></tr>
+        <tr><td>Single-Arm DB Row</td><td>4</td><td>8–10</td><td>90s</td></tr>
+        <tr><td>KB or DB Overhead Press</td><td>3</td><td>8–10</td><td>90s</td></tr>
+        <tr><td>KB Swing (heavy)</td><td>3</td><td>12–15</td><td>2 min</td></tr>
+        <tr><td>Pallof Press (anti-rotation)</td><td>3</td><td>10/side</td><td>60s</td></tr>
+      </table>
+      <p style="margin-top:0.6rem;"><em>Barbell option:</em> Swap DB bench for barbell bench and OHP for barbell overhead press if you want more load on Day B.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>5/3/1 Calculator — Front Squat</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <p>Enter your numbers. The app calculates your training max and all three weeks of the wave. Remember: your front squat 1RM is typically 70–85% of your back squat.</p>
+      <div class="calc-grid">
+        <div>
+          <label>Front Squat 1RM (lbs)</label>
+          <input type="number" id="calc1RM" placeholder="e.g. 225" oninput="runCalc()">
+        </div>
+        <div>
+          <label>OR 5-Rep Max (lbs)</label>
+          <input type="number" id="calc5RM" placeholder="e.g. 195" oninput="runCalc()">
+        </div>
+      </div>
+      <div id="calcResults"></div>
+      <p style="margin-top:0.6rem;font-size:0.8rem;color:var(--muted);">Round to the nearest 5 lbs (or 2.5 kg). The last set each week is AMRAP — leave 1 rep in the tank if you have rolling the next day.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>5/3/1 Progression (12 Weeks)</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <p>Three 4-week cycles. After each cycle, add 5 lbs to your front squat TM (lighter bump than back squat because front squat is harder to recover from).</p>
+      <table class="schedule-table">
+        <tr><th>Cycle</th><th>Weeks</th><th>Front Squat TM Bump</th><th>Focus</th></tr>
+        <tr><td>1</td><td>1–4</td><td>Start TM</td><td>Learn the weights. Leave reps in tank.</td></tr>
+        <tr><td>2</td><td>5–8</td><td>+5 lbs</td><td>Push the AMRAP sets. Log PRs.</td></tr>
+        <tr><td>3</td><td>9–12</td><td>+10 lbs total</td><td>Peak strength. Heavy but controlled.</td></tr>
+      </table>
+      <p style="margin-top:0.6rem;"><strong>Week 4, 8, 12:</strong> Deload. Cut all main-lift work to 3×5 at 60% TM. Keep accessories light. This is when you absorb the gains.</p>
+      <p><strong>After week 12:</strong> Reset. Take 90% of your best estimated 1RM from the cycle and start over. Run this block all year.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Core Finisher (any day)</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <ul>
+        <li>Dead bug: 3 × 8/side</li>
+        <li>Side plank: 3 × 30s/side</li>
+        <li>Ab wheel rollout: 3 × 8–10</li>
+      </ul>
+      <p>Do this after strength work or on a light BJJ day. Never before heavy rolling.</p>
+    </div></div>
+  </div>
+</div>
+
+<!-- EXPLOSIVE -->
+<div id="explosive" class="tab-content hidden">
+  <div class="section-title">Alactic Power & Power-Endurance</div>
+  <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.8rem;">Short, maximal efforts with full recovery. Builds the snap for throws, takedowns, and sudden escapes. All exercises below can be done at Anytime Fitness.</p>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Treadmill Hill Sprints</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">Treadmill</span>
+        <span class="badge badge-orange">Anytime Fitness</span>
+      </div>
+      <p>Set incline to 8–12% and speed to a sprint you can hold for 10–15 seconds. Simulates the forward-drive of Judo throws without weather dependency.</p>
+      <ul>
+        <li><strong>Weeks 1–3:</strong> 4 sprints, 2 min rest</li>
+        <li><strong>Weeks 4–6:</strong> 6 sprints</li>
+        <li><strong>Weeks 7–9:</strong> 8 sprints</li>
+        <li><strong>Weeks 10–12:</strong> 6 sprints (deload)</li>
+      </ul>
+      <p>Hold the handles to jump on/off safely. Do not grab the rails during the sprint.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>AirBike Sprints</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">AirBike</span>
+        <span class="badge badge-red">Low Impact</span>
+      </div>
+      <p>The AirBike delivers full-body power with zero joint pounding. Perfect for heavy training weeks when your knees need a break.</p>
+      <ul>
+        <li>10–15 calories as fast as possible</li>
+        <li>Rest 2–3 min</li>
+        <li>6–10 total reps</li>
+        <li>Progress by reducing rest or adding reps, not by extending work time</li>
+      </ul>
+      <p>Drive with arms and legs together. Do not coast — every second counts.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Kettlebell Swing — Power Endurance</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">Kettlebell</span>
+        <span class="badge badge-orange">Anytime Fitness</span>
+      </div>
+      <p>Heavy swings (20–32kg) bridge the gap between pure power and the repeated bursts of a 5–10 min roll.</p>
+      <ul>
+        <li><strong>Option A — EMOM:</strong> Every minute × 10 min — 10 explosive swings</li>
+        <li><strong>Option B — Density:</strong> 20 swings every 90s × 8 rounds</li>
+        <li><strong>Option C — Ladder:</strong> 10-9-8-7-6-5-4-3-2-1 reps, rest as needed</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Dumbbell Snatch / Clean & Press</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">Dumbbells</span>
+        <span class="badge badge-orange">Unilateral</span>
+      </div>
+      <p>Single-arm dumbbell snatches train triple extension (hip-knee-ankle) — the same extension chain used in seoi-nage and uchi-mata.</p>
+      <ul>
+        <li>5 reps each arm × 4–6 sets</li>
+        <li>Rest 2 min between sets</li>
+        <li>Use a moderate-heavy weight (30–50% bodyweight per hand)</li>
+        <li>Alternate with dumbbell clean & press if shoulders are sensitive</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Box Jumps & Broad Jumps</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">Plyo Box</span>
+        <span class="badge badge-orange">Anytime Fitness</span>
+      </div>
+      <p>Plyometrics train the stretch-shortening cycle — critical for explosive hip extension in throws and guard passes.</p>
+      <ul>
+        <li><strong>Box Jumps:</strong> 4 sets × 5 reps (full reset between reps)</li>
+        <li><strong>Broad Jumps:</strong> 3 sets × 6 reps</li>
+        <li>Rest 2 min between sets</li>
+      </ul>
+      <p>Land softly with full hip extension. Step down; do not jump down.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Explosive Burpees</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-red">No Equipment</span>
+        <span class="badge badge-orange">Anywhere</span>
+      </div>
+      <p>Maximal-effort reps with full recovery. Not the CrossFit grind.</p>
+      <ul>
+        <li>Drop to chest, explode up with a jump and clap</li>
+        <li>5 reps × 4–6 sets</li>
+        <li>Rest 90–120s between sets</li>
+      </ul>
+      <p>If you can do more than 8 reps per set, you are not going hard enough. Quality over quantity.</p>
+    </div></div>
+  </div>
+</div>
+
+<!-- ENDURANCE -->
+<div id="endurance" class="tab-content hidden">
+  <div class="section-title">Aerobic Base & Anaerobic Capacity</div>
+  <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.8rem;">Longer efforts that let you maintain pressure and recover between explosive exchanges. All equipment available at Anytime Fitness.</p>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Zone 2 Treadmill / AirBike</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">Treadmill / AirBike</span>
+        <span class="badge badge-orange">Recovery</span>
+      </div>
+      <p>The aerobic base is the engine that prevents you from gassing in minute 3 of a 10-minute roll.</p>
+      <ul>
+        <li>Treadmill: 30–45 min at 5–7% incline, 3.5–4.5 mph walk/jog</li>
+        <li>AirBike: 30–40 min at easy pace (nose-breathing only, ~50–60 RPM)</li>
+        <li>Heart rate ~120–140 bpm (conversational pace)</li>
+        <li>1–2× per week</li>
+      </ul>
+      <p>Do this on a non-BJJ/Judo day or the morning of a light training day.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Tempo Runs (Treadmill)</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">Treadmill</span>
+        <span class="badge badge-orange">Moderate</span>
+      </div>
+      <p>"Comfortably hard" — teaches your body to clear lactate while still moving.</p>
+      <ul>
+        <li>10 min easy warm-up</li>
+        <li>20 min at tempo pace (you could speak in short phrases only)</li>
+        <li>10 min cool-down</li>
+        <li>1× per week</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>AirBike Intervals — Lactic Capacity</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-red">High Intensity</span>
+        <span class="badge badge-blue">AirBike</span>
+      </div>
+      <p>Mimics the burn of a tough Judo match or a scramble-heavy BJJ round.</p>
+      <ul>
+        <li>30s all-out / 90s easy × 8–12 rounds</li>
+        <li>Or 1 min hard / 2 min easy × 6 rounds</li>
+        <li>Progress by adding rounds or shortening rest</li>
+      </ul>
+      <p>These suck. That is the point. Start with 6 rounds if you are new to intervals.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Jump Rope — Grip + Feet</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-red">Cheap Tool</span>
+        <span class="badge badge-orange">Indoor</span>
+      </div>
+      <p>Develops footwork rhythm and forearm endurance for gripping gi sleeves and collars.</p>
+      <ul>
+        <li>3 rounds × 5 min</li>
+        <li>1 min rest between rounds</li>
+        <li>Mix basic bounce, high knees, and double-unders</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Kettlebell Long Cycle (Clean & Jerk)</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">Kettlebell</span>
+        <span class="badge badge-orange">Full Body</span>
+      </div>
+      <p>Girevoy sport style: continuous reps for time. Builds the exact kind of sustained power-endurance you need in long rolls.</p>
+      <ul>
+        <li>2 × 16kg (or 1 × 20–24kg) bells</li>
+        <li>5 min continuous work — aim for 40–60 reps</li>
+        <li>Rest 3 min; repeat 2–3 sets</li>
+        <li>If single bell: alternate arms every rep</li>
+      </ul>
+    </div></div>
+  </div>
+</div>
+
+<!-- SPORT-SPECIFIC -->
+<div id="sport" class="tab-content hidden">
+  <div class="section-title">Mat-Ready Movements</div>
+  <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.8rem;">Conditioning that directly transfers to the techniques and positions you repeat in competition. Use Anytime Fitness floor space or do these at home.</p>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Continuous Technical Stand-Ups</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-red">No Equipment</span>
+        <span class="badge badge-orange">Small Space</span>
+      </div>
+      <p>The most BJJ-specific cardio drill. Builds hip mobility and the exact motion used to regain guard.</p>
+      <ul>
+        <li>3 min work / 1 min rest × 3–5 rounds</li>
+        <li>Move forward across the room, turn, come back</li>
+        <li>Keep hands protecting your face; do not rush the technique</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Shrimping / Hip Escapes</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-red">No Equipment</span>
+        <span class="badge badge-orange">Small Space</span>
+      </div>
+      <p>Down the mat and back. The goal is continuous motion, not speed — smooth is fast.</p>
+      <ul>
+        <li>2 min on / 30s off × 6 rounds</li>
+        <li>Alternate sides each rep</li>
+        <li>Add a resistance band around hips if available</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Bridge & Roll Circuits</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-red">No Equipment</span>
+        <span class="badge badge-orange">Judo Specific</span>
+      </div>
+      <p>High-intensity bridging develops the power to escape mount and set up throws.</p>
+      <ul>
+        <li>30s explosive bridges / 30s rest × 8 rounds</li>
+        <li>Drive hips to ceiling; do not stay on shoulders</li>
+        <li>Superset with 10 sit-outs per round if desired</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Grip Endurance Complex</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">Dumbbells / Pull-up Bar</span>
+        <span class="badge badge-orange">Anytime Fitness</span>
+      </div>
+      <p>Judo and BJJ destroy your grips. This keeps them from failing in overtime.</p>
+      <ul>
+        <li>Dead hang: max time (aim for 60s+)</li>
+        <li>Towel pull-ups or gi-grip pull-ups: 3 × max reps</li>
+        <li>Heavy dumbbell farmer's carry: 40m × 3 rounds</li>
+        <li>Wrist roller or rice bucket: 3 min</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Bear Crawls & Crab Walks</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-red">No Equipment</span>
+        <span class="badge badge-orange">Core</span>
+      </div>
+      <p>Quadrupedal movement builds shoulder stability, hip mobility, and core endurance for scrambling.</p>
+      <ul>
+        <li>Bear crawl forward 20m + backward 20m</li>
+        <li>Crab walk 20m</li>
+        <li>Rest 60s; repeat 4–6 times</li>
+        <li>Keep hips low on bear crawl; do not pike</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Dumbbell Thruster / Goblet Squat Complex</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <div class="meta-row">
+        <span class="badge badge-blue">Dumbbells</span>
+        <span class="badge badge-orange">Anytime Fitness</span>
+      </div>
+      <p>Thrusters combine a front squat and overhead press — mimicking the leg drive and postural demands of standing up in base.</p>
+      <ul>
+        <li>2 dumbbells at shoulder height</li>
+        <li>Squat deep, drive up, press overhead in one motion</li>
+        <li>8–10 reps × 4 sets, rest 2 min</li>
+        <li>Superset with renegade rows for core anti-rotation</li>
+      </ul>
+    </div></div>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div id="schedule" class="tab-content hidden">
+  <div class="section-title">12-Week General Conditioning Block</div>
+  <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.8rem;">Flexible template built around 2–3 BJJ/Judo sessions per week. Use Anytime Fitness for 5/3/1 strength + conditioning. Rest when you need it.</p>
+
+  <div class="note">
+    <strong>Training Context:</strong> You train BJJ/Judo 2–3× weekly on no fixed schedule. Add 2 strength/conditioning sessions at Anytime Fitness. If you trained hard Mon/Tue, take Wed light. Listen to your body — volume is a dial, not a switch.
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Weekly Template</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <table class="schedule-table">
+        <tr><th>Day</th><th>Focus</th><th>Session</th></tr>
+        <tr><td>Day 1</td><td>BJJ / Judo</td><td>Mat work — no extra lifting</td></tr>
+        <tr><td>Day 2</td><td>BJJ / Judo</td><td>Mat work — no extra lifting</td></tr>
+        <tr><td>Day 3</td><td>5/3/1 Day A</td><td>Front Squat + Pull + core (60 min)</td></tr>
+        <tr><td>Day 4</td><td>BJJ / Judo (opt)</td><td>Mat work if you feel fresh; skip if sore</td></tr>
+        <tr><td>Day 5</td><td>5/3/1 Day B</td><td>Bench + Row + Hinge + core (60 min)</td></tr>
+        <tr><td>Day 6</td><td>Conditioning</td><td>Explosive OR Endurance + sport-specific circuits</td></tr>
+        <tr><td>Day 7</td><td>Rest</td><td>Walk, stretch, eat, sleep</td></tr>
+      </table>
+      <p style="margin-top:0.6rem;font-size:0.8rem;color:var(--muted);">If you only did 2 mat sessions this week, keep both 5/3/1 days and add a conditioning day. If you did 3 hard mat sessions, drop one strength day and do light conditioning only.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Cycle 1 — Weeks 1–4 (Foundation)</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <ul>
+        <li><strong>5/3/1:</strong> Establish your front squat TM. Conservative. Leave 2 reps in the tank on AMRAP sets.</li>
+        <li><strong>Conditioning:</strong> Treadmill hill sprints 4 reps + box jumps 3×5 + KB swings EMOM 8 min</li>
+        <li><strong>Endurance:</strong> Zone 2 treadmill or AirBike 30 min + 10 min technical stand-ups</li>
+        <li><strong>Week 4:</strong> Deload. Front squat 3×5 at 60% TM. Cut conditioning volume 40%.</li>
+      </ul>
+      <p>Goal: groove the movements, build work capacity, leave gas in the tank for rolling.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Cycle 2 — Weeks 5–8 (Build)</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <ul>
+        <li><strong>5/3/1:</strong> Add 5 lbs to front squat TM, 5 lbs to bench/OHP TM. Push the AMRAP sets hard.</li>
+        <li><strong>Conditioning:</strong> Treadmill hill sprints 6 reps + broad jumps 3×6 + DB snatches 4×5/arm + KB swings EMOM 10 min</li>
+        <li><strong>Endurance:</strong> Tempo run 20 min + shrimping circuits 6 rounds + dead hangs</li>
+        <li><strong>Week 8:</strong> Deload. Same rules as week 4.</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <h3>Cycle 3 — Weeks 9–12 (Peak + Deload)</h3><div class="chevron">▼</div>
+    </div>
+    <div class="card-body"><div class="card-content">
+      <ul>
+        <li><strong>5/3/1:</strong> TM now +10 lbs from start. Heavy singles and doubles on the 95% week. Log PRs.</li>
+        <li><strong>Conditioning:</strong> Treadmill hill sprints 8 reps OR AirBike sprints 10 reps + explosive burpees 5×5 + KB long cycle 2×5 min</li>
+        <li><strong>Endurance:</strong> AirBike intervals 10 rounds + bridge circuits + grip complex + bear crawls</li>
+        <li><strong>Week 12:</strong> Deload. Reset and rest. Take 3–5 days off after this week.</li>
+      </ul>
+      <p>This is the hardest block. If your rolls feel sluggish, drop one sprint or one interval round. Strength takes a back seat to mat performance here.</p>
+    </div></div>
+  </div>
+
+  <div class="note">
+    <strong>Year-round use:</strong> After week 12, take 3–5 days off, then restart at Cycle 1. Use 90% of your best estimated 1RM from the previous block as your new training max. Run this indefinitely.
+  </div>
+</div>
+
+<!-- TIMER -->
+<div id="timer" class="tab-content hidden">
+  <div class="section-title">Circuit Timer — Sets & Reps</div>
+  <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.8rem;">Build your workout, hit start, and follow the cues. Presets loaded for common grappling circuits. Works offline.</p>
+
+  <div class="timer-card">
+    <div class="timer-label" id="timerStatus">READY</div>
+    <div class="timer-display" id="timerDisplay">00:00</div>
+    <div class="timer-sub" id="timerExercise">—</div>
+    <div class="timer-label" id="timerRound">Set 0 / 0 — Exercise 0 / 0</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="timer-controls">
+      <button class="primary" id="btnStart" onclick="startCircuit()">START</button>
+      <button onclick="pauseCircuit()">PAUSE</button>
+      <button onclick="resetCircuit()">RESET</button>
+    </div>
+
+    <div class="quick-presets" style="margin-top:1.2rem;">
+      <button onclick="loadPreset('hill')">
+        Hill Sprints
+        <small>4–8 sprints, 2min rest</small>
+      </button>
+      <button onclick="loadPreset('airbike')">
+        AirBike Intervals
+        <small>30s on / 90s off × 8</small>
+      </button>
+      <button onclick="loadPreset('kb')">
+        KB Swing EMOM
+        <small>10 swings / 60s × 10</small>
+      </button>
+      <button onclick="loadPreset('sport')">
+        Sport Circuit
+        <small>Tech stand-up + shrimp + bridge</small>
+      </button>
+      <button onclick="loadPreset('grip')">
+        Grip Complex
+        <small>Hang + carry + pull-up rounds</small>
+      </button>
+      <button onclick="loadPreset('burpee')">
+        Explosive Burpees
+        <small>5 reps / 90s rest × 6</small>
+      </button>
+    </div>
+
+    <div class="exercise-list" id="exerciseList">
+      <div class="ex-row">
+        <div><label>Exercise</label><input class="name" value="Treadmill Sprint" placeholder="Name"></div>
+        <div><label>Sets</label><input type="number" value="1" class="sets"></div>
+        <div><label>Reps</label><input type="number" value="1" class="reps"></div>
+        <div><label>Work (s)</label><input type="number" value="15" class="work"></div>
+        <div><label>Rest (s)</label><input type="number" value="120" class="rest"></div>
+      </div>
+    </div>
+
+    <div class="ex-add-del">
+      <button onclick="addExercise()">+ Add Exercise</button>
+      <button onclick="removeExercise()">− Remove Last</button>
+    </div>
+
+    <div class="preset-row" style="display:flex;gap:0.4rem;justify-content:center;margin-top:0.8rem;">
+      <button onclick="clearAll()">Clear All</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESS / GAMIFICATION -->
+<div id="progress" class="tab-content hidden">
+  <div class="section-title">Your Fighter Profile</div>
+
+  <div class="belt-display">
+    <div class="belt-name" id="beltName">White Belt</div>
+    <div class="belt-sub" id="beltSub">Level 1 — Novice</div>
+  </div>
+
+  <div class="xp-bar-wrap">
+    <div class="xp-bar-fill" id="xpBarFill">0%</div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="num" id="statTotalWorkouts">0</div>
+      <div class="lbl">Workouts</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="statTotalXP">0</div>
+      <div class="lbl">Total XP</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="statStreak">0</div>
+      <div class="lbl">Week Streak</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="statBestStreak">0</div>
+      <div class="lbl">Best Streak</div>
+    </div>
+  </div>
+
+  <div class="section-title">12-Week Block Progress</div>
+  <div class="block-progress" id="blockProgress">
+    <div class="block-week">1</div><div class="block-week">2</div><div class="block-week">3</div><div class="block-week">4</div>
+    <div class="block-week">5</div><div class="block-week">6</div><div class="block-week">7</div><div class="block-week">8</div>
+    <div class="block-week">9</div><div class="block-week">10</div><div class="block-week">11</div><div class="block-week">12</div>
+  </div>
+
+  <div class="section-title">Achievements</div>
+  <div class="badge-grid" id="badgeGrid"></div>
+
+  <div class="section-title">Log a Workout</div>
+  <div class="log-form">
+    <select id="logType">
+      <option value="5/3/1 Day A">5/3/1 Day A — Front Squat & Pull</option>
+      <option value="5/3/1 Day B">5/3/1 Day B — Push & Hinge</option>
+      <option value="Explosive">Explosive Conditioning</option>
+      <option value="Endurance">Endurance Conditioning</option>
+      <option value="Sport">Sport-Specific</option>
+      <option value="BJJ/Judo">BJJ / Judo Class</option>
+      <option value="Other">Other</option>
+    </select>
+    <input type="date" id="logDate">
+    <textarea id="logNotes" placeholder="Exercises, weights, reps, how it felt..."></textarea>
+    <button onclick="logWorkout()">+ Log Workout & Earn XP</button>
+  </div>
+
+  <div class="section-title">Recent Logs</div>
+  <div class="log-list" id="logList">
+    <p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:1rem;">No workouts logged yet. Get under the bar!</p>
+  </div>
+
+  <div class="section-title">Personal Records</div>
+  <div class="card">
+    <div class="card-body" style="max-height:none;border-top-color:var(--border);"><div class="card-content">
+      <p style="margin-bottom:0.6rem;">Track your best lifts and times. Update these when you hit a new max. The app counts PRs toward achievements.</p>
+      <table class="pr-table">
+        <tr><th>Lift / Metric</th><th>Record</th><th>Date</th></tr>
+        <tr><td>Front Squat</td><td><input id="prFrontSquat" placeholder="lbs/kg"></td><td><input id="prFrontSquatDate" type="date"></td></tr>
+        <tr><td>Back Squat</td><td><input id="prBackSquat" placeholder="lbs/kg"></td><td><input id="prBackSquatDate" type="date"></td></tr>
+        <tr><td>DB Bench</td><td><input id="prBench" placeholder="lbs/kg"></td><td><input id="prBenchDate" type="date"></td></tr>
+        <tr><td>Overhead Press</td><td><input id="prOHP" placeholder="lbs/kg"></td><td><input id="prOHPDate" type="date"></td></tr>
+        <tr><td>Dead Hang</td><td><input id="prHang" placeholder="seconds"></td><td><input id="prHangDate" type="date"></td></tr>
+        <tr><td>AirBike 10cal</td><td><input id="prBike" placeholder="seconds"></td><td><input id="prBikeDate" type="date"></td></tr>
+        <tr><td>Treadmill Sprint (incline)</td><td><input id="prSprint" placeholder="mph / level"></td><td><input id="prSprintDate" type="date"></td></tr>
+      </table>
+      <button onclick="savePRs()" style="margin-top:0.8rem;width:100%;background:var(--accent2);color:#000;border:none;border-radius:8px;padding:0.6rem;font-weight:700;cursor:pointer;">Save PRs</button>
+    </div></div>
+  </div>
+
+  <div class="note" style="margin-top:1rem;">
+    <strong>Gamification tips:</strong> Aim for 2–3 logged sessions per week to keep your streak alive. Set a PR every cycle. The belt ranks mirror BJJ progression — see how fast you can reach Black Belt.
+  </div>
+</div>
+
+</main>
+
+<footer>
+  12-week Front Squat 5/3/1 + gamified conditioning — Anytime Fitness equipped.<br>Works fully offline. Progress saves to this device.<br>
+  <span style="color:var(--accent)">Train smart. Level up. Tap nobody.</span>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ===== DATA / LOCAL STORAGE =====
+  const STORAGE_KEY = 'grappler_engine_v32';
+  let gameData = {
+    xp: 0,
+    workouts: [],
+    achievements: [],
+    prs: {},
+    startDate: new Date().toISOString().split('T')[0]
+  };
+
+  const BELTS = [
+    {name:'White Belt', level:1, min:0, color:'#e8e8e8'},
+    {name:'White Belt II', level:2, min:500, color:'#ddd'},
+    {name:'Blue Belt', level:3, min:1000, color:'#3498db'},
+    {name:'Blue Belt II', level:4, min:2000, color:'#2980b9'},
+    {name:'Purple Belt', level:5, min:3500, color:'#9b59b6'},
+    {name:'Purple Belt II', level:6, min:5500, color:'#8e44ad'},
+    {name:'Brown Belt', level:7, min:8000, color:'#795548'},
+    {name:'Brown Belt II', level:8, min:11000, color:'#6d4c41'},
+    {name:'Black Belt', level:9, min:15000, color:'#111'},
+    {name:'Black Belt II', level:10, min:20000, color:'#000'}
+  ];
+
+  const ALL_ACHIEVEMENTS = [
+    {id:'first_blood', name:'First Blood', desc:'Log your first workout', icon:'🩸'},
+    {id:'week_warrior', name:'Week Warrior', desc:'3 workouts in one week', icon:'⚔️'},
+    {id:'iron_grip', name:'Iron Grip', desc:'30 min total dead hang time', icon:'✊'},
+    {id:'hill_killer', name:'Hill Killer', desc:'20 hill sprint sessions logged', icon:'⛰️'},
+    {id:'bike_assassin', name:'AirBike Assassin', desc:'10 AirBike interval sessions', icon:'🚴'},
+    {id:'iron_horse', name:'Iron Horse', desc:'Complete 12-week block', icon:'🐴'},
+    {id:'pr_hunter', name:'PR Hunter', desc:'Set 5 personal records', icon:'🏆'},
+    {id:'night_owl', name:'Night Owl', desc:'Workout after 8pm', icon:'🌙'},
+    {id:'early_bird', name:'Early Bird', desc:'Workout before 7am', icon:'🌅'},
+    {id:'double_day', name:'Double Day', desc:'Two workouts in one day', icon:'💪'},
+    {id:'consistency', name:'Consistency King', desc:'4-week streak', icon:'👑'},
+    {id:'strength_lord', name:'Strength Lord', desc:'50 strength sessions', icon:'🏋️'},
+    {id:'mat_rat', name:'Mat Rat', desc:'50 BJJ/Judo classes logged', icon:'🥋'},
+    {id:'explosive', name:'Explosive', desc:'20 explosive conditioning sessions', icon:'💥'},
+    {id:'endurance', name:'Endurance Demon', desc:'20 endurance sessions', icon:'🔥'},
+    {id:'squat_king', name:'Squat King', desc:'Log 30 squat sessions', icon:'🦵'}
+  ];
+
+  function loadData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) gameData = JSON.parse(raw);
+    } catch(e) {}
+    renderProgress();
+  }
+  function saveData() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData)); } catch(e) {}
+    renderProgress();
+  }
+
+  function getBelt() {
+    for (let i = BELTS.length - 1; i >= 0; i--) {
+      if (gameData.xp >= BELTS[i].min) return BELTS[i];
+    }
+    return BELTS[0];
+  }
+  function getNextBelt() {
+    const cur = getBelt();
+    const idx = BELTS.indexOf(cur);
+    return BELTS[idx + 1] || null;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function checkAchievements() {
+    const w = gameData.workouts;
+    const ids = gameData.achievements;
+    const newIds = [];
+    const has = (id) => ids.includes(id);
+    const countType = (t) => w.filter(x => x.type === t).length;
+
+    if (w.length >= 1 && !has('first_blood')) newIds.push('first_blood');
+
+    const weeks = {};
+    w.forEach(x => { const k = getWeekKey(x.date); weeks[k] = (weeks[k]||0)+1; });
+    if (Object.values(weeks).some(c => c >= 3) && !has('week_warrior')) newIds.push('week_warrior');
+
+    if (countType('Explosive') >= 20 && !has('hill_killer')) newIds.push('hill_killer');
+    if (w.filter(x => x.notes && x.notes.toLowerCase().includes('airbike')).length >= 10 && !has('bike_assassin')) newIds.push('bike_assassin');
+    const uniqueWeeks = Object.keys(weeks).length;
+    if (uniqueWeeks >= 12 && !has('iron_horse')) newIds.push('iron_horse');
+
+    w.forEach(x => {
+      const h = parseInt(x.time?.split(':')[0] || 12);
+      if (h >= 20 && !has('night_owl')) newIds.push('night_owl');
+      if (h < 7 && !has('early_bird')) newIds.push('early_bird');
+    });
+
+    const days = {};
+    w.forEach(x => { days[x.date] = (days[x.date]||0)+1; });
+    if (Object.values(days).some(c => c >= 2) && !has('double_day')) newIds.push('double_day');
+    if (getCurrentStreak() >= 4 && !has('consistency')) newIds.push('consistency');
+    if (countType('5/3/1 Day A') + countType('5/3/1 Day B') >= 50 && !has('strength_lord')) newIds.push('strength_lord');
+    if (countType('BJJ/Judo') >= 50 && !has('mat_rat')) newIds.push('mat_rat');
+    if (countType('Explosive') >= 20 && !has('explosive')) newIds.push('explosive');
+    if (countType('Endurance') >= 20 && !has('endurance')) newIds.push('endurance');
+    if (countType('5/3/1 Day A') >= 30 && !has('squat_king')) newIds.push('squat_king');
+
+    // PR Hunter
+    let prCount = 0;
+    if (gameData.prs) {
+      ['frontSquat','backSquat','bench','ohp','hang','bike','sprint'].forEach(k => {
+        if (gameData.prs[k] && String(gameData.prs[k]).trim() !== '') prCount++;
+      });
+    }
+    if (prCount >= 5 && !has('pr_hunter')) newIds.push('pr_hunter');
+
+    if (newIds.length > 0) {
+      gameData.achievements.push(...newIds);
+      newIds.forEach(id => {
+        const a = ALL_ACHIEVEMENTS.find(x => x.id === id);
+        if (a) showToast('🏅 Achievement: ' + a.name + '!');
+      });
+      saveData();
+    }
+  }
+
+  function getWeekKey(dateStr) {
+    const d = new Date(dateStr);
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate() - d.getDay());
+    return d.toISOString().split('T')[0];
+  }
+
+  function getCurrentStreak() {
+    const weeks = new Set(gameData.workouts.map(x => getWeekKey(x.date)));
+    const sorted = Array.from(weeks).sort();
+    if (sorted.length === 0) return 0;
+    let streak = 1;
+    for (let i = sorted.length - 1; i > 0; i--) {
+      const a = new Date(sorted[i]); const b = new Date(sorted[i-1]);
+      const diff = (a - b) / (1000*60*60*24);
+      if (diff <= 8) streak++; else break;
+    }
+    return streak;
+  }
+  function getBestStreak() {
+    const weeks = Array.from(new Set(gameData.workouts.map(x => getWeekKey(x.date)))).sort();
+    if (weeks.length === 0) return 0;
+    let best = 1, cur = 1;
+    for (let i = 1; i < weeks.length; i++) {
+      const a = new Date(weeks[i]); const b = new Date(weeks[i-1]);
+      const diff = (a - b) / (1000*60*60*24);
+      if (diff <= 8) { cur++; best = Math.max(best, cur); } else { cur = 1; }
+    }
+    return best;
+  }
+
+  function logWorkout() {
+    const type = document.getElementById('logType').value;
+    const date = document.getElementById('logDate').value || new Date().toISOString().split('T')[0];
+    const notes = document.getElementById('logNotes').value;
+    const time = new Date().toTimeString().slice(0,5);
+
+    let xp = 100;
+    if (type.startsWith('5/3/1')) xp = 130;
+    if (type === 'BJJ/Judo') xp = 80;
+
+    gameData.workouts.unshift({ type, date, notes, time, xp });
+    gameData.xp += xp;
+
+    document.getElementById('logNotes').value = '';
+    document.getElementById('logDate').value = '';
+
+    saveData();
+    checkAchievements();
+    showToast('+' + xp + ' XP — Workout logged!');
+  }
+
+  function deleteWorkout(index) {
+    const w = gameData.workouts[index];
+    if (w) {
+      gameData.xp = Math.max(0, gameData.xp - (w.xp || 100));
+      gameData.workouts.splice(index, 1);
+      saveData();
+      renderProgress();
+      showToast('Workout deleted');
+    }
+  }
+
+  function renderProgress() {
+    const belt = getBelt();
+    const next = getNextBelt();
+    document.getElementById('beltName').textContent = belt.name;
+    document.getElementById('beltName').style.color = belt.color;
+    document.getElementById('beltSub').textContent = 'Level ' + belt.level + (next ? ' — ' + (next.min - gameData.xp) + ' XP to ' + next.name : ' — Max Rank');
+
+    const pct = next ? Math.min(100, ((gameData.xp - belt.min) / (next.min - belt.min)) * 100) : 100;
+    const bar = document.getElementById('xpBarFill');
+    bar.style.width = pct + '%';
+    bar.textContent = Math.round(pct) + '%';
+
+    document.getElementById('statTotalWorkouts').textContent = gameData.workouts.length;
+    document.getElementById('statTotalXP').textContent = gameData.xp;
+    document.getElementById('statStreak').textContent = getCurrentStreak();
+    document.getElementById('statBestStreak').textContent = getBestStreak();
+
+    const weeks = new Set(gameData.workouts.map(x => getWeekKey(x.date)));
+    const weekEls = document.querySelectorAll('.block-week');
+    const start = new Date(gameData.startDate);
+    weekEls.forEach((el, i) => {
+      const wkStart = new Date(start);
+      wkStart.setDate(wkStart.getDate() + i * 7);
+      const wkKey = wkStart.toISOString().split('T')[0];
+      el.classList.remove('done','active');
+      if (weeks.has(wkKey)) el.classList.add('done');
+      const nowKey = getWeekKey(new Date().toISOString().split('T')[0]);
+      if (wkKey === nowKey) el.classList.add('active');
+    });
+
+    const grid = document.getElementById('badgeGrid');
+    grid.innerHTML = '';
+    ALL_ACHIEVEMENTS.forEach(a => {
+      const earned = gameData.achievements.includes(a.id);
+      const div = document.createElement('div');
+      div.className = 'badge-item' + (earned ? ' earned' : '');
+      div.innerHTML = '<div class="icon">' + a.icon + '</div><div class="bname">' + a.name + '</div><div class="bdesc">' + a.desc + '</div>';
+      grid.appendChild(div);
+    });
+
+    const list = document.getElementById('logList');
+    if (gameData.workouts.length === 0) {
+      list.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:1rem;">No workouts logged yet. Get under the bar!</p>';
+    } else {
+      list.innerHTML = '';
+      gameData.workouts.slice(0, 20).forEach((w, i) => {
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        div.innerHTML = '<span class="ldel" onclick="deleteWorkout(' + i + ')">✕</span><div class="ldate">' + w.date + ' • ' + w.type + '</div><div class="ltype">' + (w.notes || 'No notes') + '</div><div class="lxp">+' + w.xp + ' XP</div>';
+        list.appendChild(div);
+      });
+    }
+
+    if (gameData.prs) {
+      document.getElementById('prFrontSquat').value = gameData.prs.frontSquat || '';
+      document.getElementById('prFrontSquatDate').value = gameData.prs.frontSquatDate || '';
+      document.getElementById('prBackSquat').value = gameData.prs.backSquat || '';
+      document.getElementById('prBackSquatDate').value = gameData.prs.backSquatDate || '';
+      document.getElementById('prBench').value = gameData.prs.bench || '';
+      document.getElementById('prBenchDate').value = gameData.prs.benchDate || '';
+      document.getElementById('prOHP').value = gameData.prs.ohp || '';
+      document.getElementById('prOHPDate').value = gameData.prs.ohpDate || '';
+      document.getElementById('prHang').value = gameData.prs.hang || '';
+      document.getElementById('prHangDate').value = gameData.prs.hangDate || '';
+      document.getElementById('prBike').value = gameData.prs.bike || '';
+      document.getElementById('prBikeDate').value = gameData.prs.bikeDate || '';
+      document.getElementById('prSprint').value = gameData.prs.sprint || '';
+      document.getElementById('prSprintDate').value = gameData.prs.sprintDate || '';
+    }
+  }
+
+  function savePRs() {
+    gameData.prs = {
+      frontSquat: document.getElementById('prFrontSquat').value,
+      frontSquatDate: document.getElementById('prFrontSquatDate').value,
+      backSquat: document.getElementById('prBackSquat').value,
+      backSquatDate: document.getElementById('prBackSquatDate').value,
+      bench: document.getElementById('prBench').value,
+      benchDate: document.getElementById('prBenchDate').value,
+      ohp: document.getElementById('prOHP').value,
+      ohpDate: document.getElementById('prOHPDate').value,
+      hang: document.getElementById('prHang').value,
+      hangDate: document.getElementById('prHangDate').value,
+      bike: document.getElementById('prBike').value,
+      bikeDate: document.getElementById('prBikeDate').value,
+      sprint: document.getElementById('prSprint').value,
+      sprintDate: document.getElementById('prSprintDate').value
+    };
+    saveData();
+    showToast('PRs saved!');
+    checkAchievements();
+  }
+
+  // ===== 5/3/1 CALCULATOR =====
+  function runCalc() {
+    const rm1 = parseFloat(document.getElementById('calc1RM').value);
+    const rm5 = parseFloat(document.getElementById('calc5RM').value);
+    let tm = 0;
+    if (rm1 > 0) tm = Math.round(rm1 * 0.9 / 5) * 5;
+    else if (rm5 > 0) tm = Math.round(rm5 * 1.15 * 0.9 / 5) * 5;
+
+    const out = document.getElementById('calcResults');
+    if (tm <= 0) { out.innerHTML = ''; return; }
+
+    const round5 = (x) => Math.round(x / 5) * 5;
+    const w1 = [{p:0.65, r:5}, {p:0.75, r:5}, {p:0.85, r:'5+'}];
+    const w2 = [{p:0.70, r:3}, {p:0.80, r:3}, {p:0.90, r:'3+'}];
+    const w3 = [{p:0.75, r:5}, {p:0.85, r:3}, {p:0.95, r:'1+'}];
+
+    function fmtWeek(name, sets) {
+      let html = '<div class="calc-result"><div class="week-title">' + name + '</div>';
+      sets.forEach((s,i) => {
+        const wgt = round5(tm * s.p);
+        html += '<div class="set-line">Set ' + (i+1) + ': ' + wgt + ' lbs × ' + s.r + (String(s.r).includes('+') ? ' <span class="amrap">(AMRAP)</span>' : '') + '</div>';
+      });
+      html += '</div>';
+      return html;
+    }
+
+    out.innerHTML = '<p style="margin-bottom:0.5rem;"><strong>Training Max: ' + tm + ' lbs</strong></p>' +
+      fmtWeek('Week 1 — 5s', w1) + fmtWeek('Week 2 — 3s', w2) + fmtWeek('Week 3 — 1s', w3) +
+      '<div class="calc-result"><div class="week-title">Week 4 — Deload</div><div class="set-line">3 × 5 at ' + round5(tm*0.60) + ' lbs</div></div>';
+  }
+
+  // ===== TABS =====
+  const tabs = document.querySelectorAll('.tabs button');
+  const contents = document.querySelectorAll('.tab-content');
+  tabs.forEach(t => {
+    t.addEventListener('click', () => {
+      tabs.forEach(b => b.classList.remove('active'));
+      t.classList.add('active');
+      contents.forEach(c => c.classList.add('hidden'));
+      document.getElementById(t.dataset.target).classList.remove('hidden');
+      if (t.dataset.target === 'progress') renderProgress();
+    });
+  });
+
+  // ===== ACCORDION =====
+  function toggleCard(header) {
+    const card = header.parentElement;
+    card.classList.toggle('open');
+  }
+
+  // ===== AUDIO =====
+  let audioCtx = null;
+  function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function beep(freq = 880, duration = 0.15, type = 'square') {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  }
+
+  // ===== CIRCUIT TIMER =====
+  let circuitTimer = null;
+  let circuitState = { exercises:[], exIndex:0, setIndex:1, timeLeft:0, isWork:true, running:false, totalSets:0, totalExercises:0 };
+
+  function getExercises() {
+    const rows = document.querySelectorAll('#exerciseList .ex-row');
+    const out = [];
+    rows.forEach(r => {
+      out.push({
+        name: r.querySelector('.name').value.trim() || 'Exercise',
+        sets: parseInt(r.querySelector('.sets').value) || 1,
+        reps: r.querySelector('.reps').value || '1',
+        work: parseInt(r.querySelector('.work').value) || 30,
+        rest: parseInt(r.querySelector('.rest').value) || 30
+      });
+    });
+    return out;
+  }
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60).toString().padStart(2,'0');
+    const s = (sec % 60).toString().padStart(2,'0');
+    return m + ':' + s;
+  }
+  function updateCircuitUI() {
+    const st = circuitState;
+    document.getElementById('timerDisplay').textContent = formatTime(st.timeLeft);
+    document.getElementById('timerRound').textContent = 'Set ' + st.setIndex + ' / ' + st.exercises[st.exIndex].sets + ' — Exercise ' + (st.exIndex + 1) + ' / ' + st.totalExercises;
+    document.getElementById('timerExercise').textContent = st.exercises[st.exIndex].name + (st.isWork ? ' (' + st.exercises[st.exIndex].reps + ' reps)' : ' — REST');
+    const status = document.getElementById('timerStatus');
+    const disp = document.getElementById('timerDisplay');
+    const bar = document.getElementById('progressFill');
+    if (st.isWork) { status.textContent = 'WORK'; disp.classList.remove('rest','done'); }
+    else { status.textContent = 'REST'; disp.classList.add('rest'); disp.classList.remove('done'); }
+    const ex = st.exercises[st.exIndex];
+    const total = st.isWork ? ex.work : ex.rest;
+    const pct = total > 0 ? ((total - st.timeLeft) / total) * 100 : 0;
+    bar.style.width = pct + '%';
+  }
+  function nextCircuitStep() {
+    const st = circuitState;
+    const ex = st.exercises[st.exIndex];
+    if (st.isWork) {
+      if (st.setIndex >= ex.sets && st.exIndex + 1 >= st.totalExercises) { finishCircuit(); return; }
+      st.isWork = false; st.timeLeft = ex.rest; beep(440, 0.25);
+    } else {
+      if (st.setIndex < ex.sets) { st.setIndex++; st.isWork = true; st.timeLeft = ex.work; beep(880, 0.25); }
+      else { st.exIndex++; if (st.exIndex >= st.totalExercises) { finishCircuit(); return; } st.setIndex = 1; st.isWork = true; st.timeLeft = st.exercises[st.exIndex].work; beep(880, 0.3); setTimeout(() => beep(1100, 0.2), 200); }
+    }
+    updateCircuitUI();
+  }
+  function startCircuit() {
+    initAudio();
+    if (circuitState.running) return;
+    const exercises = getExercises();
+    if (exercises.length === 0) { alert('Add at least one exercise'); return; }
+    if (!circuitTimer) {
+      circuitState.exercises = exercises; circuitState.exIndex = 0; circuitState.setIndex = 1;
+      circuitState.isWork = true; circuitState.timeLeft = exercises[0].work;
+      circuitState.totalExercises = exercises.length; circuitState.running = true;
+      beep(880, 0.3); updateCircuitUI();
+    } else { circuitState.running = true; }
+    circuitTimer = setInterval(() => {
+      circuitState.timeLeft--;
+      if (circuitState.timeLeft <= 0) { nextCircuitStep(); }
+      else { updateCircuitUI(); if (circuitState.timeLeft <= 3 && circuitState.timeLeft > 0) beep(1200, 0.08, 'sine'); }
+    }, 1000);
+  }
+  function pauseCircuit() { circuitState.running = false; clearInterval(circuitTimer); circuitTimer = null; document.getElementById('timerStatus').textContent = 'PAUSED'; }
+  function resetCircuit() {
+    pauseCircuit(); circuitState.exercises = []; circuitState.exIndex = 0; circuitState.setIndex = 1;
+    circuitState.isWork = true; circuitState.timeLeft = 0;
+    document.getElementById('timerDisplay').textContent = '00:00'; document.getElementById('timerStatus').textContent = 'READY';
+    document.getElementById('timerRound').textContent = 'Set 0 / 0 — Exercise 0 / 0'; document.getElementById('timerExercise').textContent = '—';
+    document.getElementById('timerDisplay').classList.remove('rest','done'); document.getElementById('progressFill').style.width = '0%';
+  }
+  function finishCircuit() {
+    pauseCircuit(); circuitState.timeLeft = 0;
+    document.getElementById('timerDisplay').textContent = '00:00'; document.getElementById('timerStatus').textContent = 'DONE';
+    document.getElementById('timerExercise').textContent = 'SESSION COMPLETE';
+    document.getElementById('timerDisplay').classList.add('done'); document.getElementById('timerDisplay').classList.remove('rest');
+    document.getElementById('progressFill').style.width = '100%';
+    beep(600, 0.4); setTimeout(() => beep(800, 0.4), 300); setTimeout(() => beep(1200, 0.6), 600);
+  }
+  function addExercise() {
+    const list = document.getElementById('exerciseList');
+    const row = document.createElement('div'); row.className = 'ex-row';
+    row.innerHTML = '<div><input class="name" value="" placeholder="Exercise"></div><div><input type="number" value="1" class="sets"></div><div><input type="number" value="1" class="reps"></div><div><input type="number" value="30" class="work"></div><div><input type="number" value="30" class="rest"></div>';
+    list.appendChild(row);
+  }
+  function removeExercise() { const list = document.getElementById('exerciseList'); if (list.children.length > 1) list.removeChild(list.lastElementChild); }
+  function clearAll() {
+    document.getElementById('exerciseList').innerHTML = '<div class="ex-row"><div><input class="name" value="" placeholder="Exercise"></div><div><input type="number" value="1" class="sets"></div><div><input type="number" value="1" class="reps"></div><div><input type="number" value="30" class="work"></div><div><input type="number" value="30" class="rest"></div></div>';
+  }
+  function buildRows(data) {
+    const list = document.getElementById('exerciseList'); list.innerHTML = '';
+    data.forEach(d => {
+      const row = document.createElement('div'); row.className = 'ex-row';
+      row.innerHTML = '<div><input class="name" value="' + d.name + '" placeholder="Exercise"></div><div><input type="number" value="' + d.sets + '" class="sets"></div><div><input type="number" value="' + d.reps + '" class="reps"></div><div><input type="number" value="' + d.work + '" class="work"></div><div><input type="number" value="' + d.rest + '" class="rest"></div>';
+      list.appendChild(row);
+    });
+  }
+  function loadPreset(name) {
+    resetCircuit();
+    const presets = {
+      hill: [{name:'Treadmill Hill Sprint', sets:6, reps:1, work:15, rest:120}, {name:'Box Jumps', sets:3, reps:5, work:45, rest:90}, {name:'KB Swing', sets:1, reps:10, work:20, rest:40}],
+      airbike: [{name:'AirBike Sprint', sets:8, reps:1, work:30, rest:90}, {name:'Rest / Shakeout', sets:1, reps:1, work:60, rest:0}],
+      kb: [{name:'KB Swing (heavy)', sets:10, reps:10, work:20, rest:40}],
+      sport: [{name:'Technical Stand-Ups', sets:3, reps:'continuous', work:180, rest:60}, {name:'Shrimp / Hip Escape', sets:3, reps:'continuous', work:120, rest:60}, {name:'Bridge & Roll', sets:3, reps:'continuous', work:60, rest:60}],
+      grip: [{name:'Dead Hang', sets:3, reps:1, work:60, rest:60}, {name:'DB Farmers Carry', sets:3, reps:1, work:45, rest:60}, {name:'Towel Pull-Up', sets:3, reps:'max', work:45, rest:90}],
+      burpee: [{name:'Explosive Burpee', sets:6, reps:5, work:30, rest:90}]
+    };
+    buildRows(presets[name] || presets['hill']);
+  }
+
+  // ===== WAKE LOCK =====
+  let wakeLock = null;
+  async function requestWakeLock() {
+    try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); }
+    catch (e) { /* ignore */ }
+  }
+  document.addEventListener('click', () => { if (!wakeLock) requestWakeLock(); }, {once:true});
+
+  // ===== INIT =====
+  document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+  loadData();
+</script>
+</body>
+</html>
